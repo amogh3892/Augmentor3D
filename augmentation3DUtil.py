@@ -204,6 +204,7 @@ class Augmentation3DUtil(object):
 
     def process(self,samples):
         img = self.img
+        mask = self.mask
         augmentations = [] 
 
         sampling = np.zeros((len(self.transforms),samples)) 
@@ -223,7 +224,7 @@ class Augmentation3DUtil(object):
                 augmentations.append(self._composite(subtransforms))
 
 
-        return img,augmentations
+        return (img,mask),augmentations
 
 
     def _flipimage(self,img):
