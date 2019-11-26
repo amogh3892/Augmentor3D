@@ -34,7 +34,7 @@ img = sitk.ReadImage(fr"**********filename***************")
 Use the Enum class Transforms for defining transforms. See examples below
 
 #### Rotation
-parameters
+parameters<br>
 probability : probability of the executing this particular transformation <br>
 degrees : degree of rotation. 
 
@@ -68,7 +68,7 @@ plt.axis('off')
 
 
 #### Flip horizontal 
-parameters
+parameters<br>
 probability : probability of the executing this particular transformation <br>
 
 
@@ -101,7 +101,7 @@ plt.axis('off')
 
 
 #### Flip vertical 
-parameters
+parameters<br>
 probability : probability of the executing this particular transformation <br>
 
 
@@ -134,7 +134,7 @@ plt.axis('off')
 
 
 #### Translation 
-parameters
+parameters<br>
 probability : probability of the executing this particular transformation <br>
 offset : 3D cordinates in mm ex. (5,5,0)
 
@@ -168,7 +168,7 @@ plt.axis('off')
 
 
 #### Shear 
-parameters
+parameters<br>
 probability : probability of the executing this particular transformation <br>
 magnitude : 3D cordinates 
 
