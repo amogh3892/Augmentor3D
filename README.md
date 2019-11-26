@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 
 ```python
-img = sitk.ReadImage(fr"I:\Projects\Data\ProstateX1\1_Original\ProstateX1_0000_L1\T2W.nii.gz")
+img = sitk.ReadImage(fr"**********filename***************")
 ```
 
 ### Performing single transformations 
