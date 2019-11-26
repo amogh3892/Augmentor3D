@@ -5,6 +5,9 @@ A module for 3D image augmentations for deep learning, specifically medical imag
 SimpleITK 
 
 
+#### Please make sure the image hearders (origin, spacing and direction) are correct, since the transformations completely depending on those headers.  
+
+
 ## 3D Augmentation module examples
 
 A module implemented for the purpose of augmenting 3D volumes.<br>
