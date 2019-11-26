@@ -36,7 +36,7 @@ Use the Enum class Transforms for defining transforms. See examples below
 #### Rotation
 parameters<br>
 probability : probability of the executing this particular transformation <br>
-degrees : degree of rotation. 
+degrees : degree of rotation in xy axis. 
 
 
 ```python
