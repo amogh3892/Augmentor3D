@@ -145,7 +145,6 @@ class Augmentation3DUtil(object):
         # Output image Origin, Spacing, Size, Direction are taken from the reference
         # image in this call to Resample
 
-        img = self.img
         reference_image = self.reference_image
         default_value = 0
 
