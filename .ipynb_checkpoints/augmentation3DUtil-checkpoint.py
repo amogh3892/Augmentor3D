@@ -13,10 +13,10 @@ class Transforms(Enum):
 
 class Augmentation3DUtil(object):
     DIMENSION = 3
-    def __init__(self,imgs,masks=None):
+    def __init__(self,img,mask=None):
         """
-        imgs : input should be list of sitk images (If masks are being provided the images must have same parameters such as spacing, origin, direction)
-        masks : as a list of sitk images of binary segmentation masks (if binary masks are involved)
+        img : input should be sitk image 
+        mask : sitk image of binary segmentation mask (if binary mask is involved)
 
         A class implemented for the purpose of augmenting 3D volumes. 
         This class uses transformations in SimpleITK library to perform augmentations. 
@@ -27,12 +27,12 @@ class Augmentation3DUtil(object):
         Note :  Use the Transforms Enum class to define the transformation. 
 
         Ex. 
-        au = Augmentation3DUtil(imgs,masks=masks)
+        au = Augmentation3DUtil(img,mask=mask)
         au.add(Transforms.SHEAR,probability = 0.75, magnitude = (0.1,0.1))
         au.add(Transforms.TRANSLATE,probability = 0.75, offset = (2,2,0))
         au.add(Transforms.ROTATE2D,probability = 0.75, degrees = 15)
         ret = au.process(10)
-        
+
 
         The above code produces 10 augmented samples by randomly combining 
         all the transformations defined with respect to their probabilities defined.
@@ -40,31 +40,23 @@ class Augmentation3DUtil(object):
         """
         self.transforms = [] 
 
-        if masks is not None:
-
-            for i in range(len(masks)):
-                mask = masks[i]
-                mask.SetDirection(imgs[0].GetDirection())
-                mask.SetOrigin(imgs[0].GetOrigin())
-                mask.SetSpacing(imgs[0].GetSpacing())
-                mask = self._flipimage(mask)
-                masks[i] = mask 
+        if mask is not None:
+            mask.SetDirection(img.GetDirection())
+            mask.SetOrigin(img.GetOrigin())
+            mask.SetSpacing(img.GetSpacing())
+            mask = self._flipimage(mask)
             
-        self.masks = masks
-
-        for i in range(len(imgs)):
-            imgs[i] = self._flipimage(imgs[i])
-            imgs[i] = sitk.Cast(imgs[i],sitk.sitkFloat64)
+        self.mask = mask 
+        img = self._flipimage(img)
 
 
-        self.img = imgs[0]
-        self.imgs = imgs
+        self.img = sitk.Cast(img,sitk.sitkFloat64)
 
         self.reference_image = None 
         self._define_reference_image()
 
     def _define_reference_image(self):
-        img = self.imgs[0] 
+        img = self.img 
         size = img.GetSize()
         dimension = Augmentation3DUtil.DIMENSION
         origin = img.GetOrigin()
@@ -153,6 +145,7 @@ class Augmentation3DUtil(object):
         # Output image Origin, Spacing, Size, Direction are taken from the reference
         # image in this call to Resample
 
+        img = self.img
         reference_image = self.reference_image
         default_value = 0
 
@@ -186,7 +179,6 @@ class Augmentation3DUtil(object):
 
 
 
-
     def _composite(self,transforms):
 
         dimension = Augmentation3DUtil.DIMENSION
@@ -194,26 +186,17 @@ class Augmentation3DUtil(object):
         for transform in transforms:
             composite.AddTransform(self._getTransform(transform)) 
         
-        imgs = self.imgs
-        masks = self.masks 
+        img = self.img 
+        mask = self.mask 
 
         augmented_mask = None 
 
-        if masks is not None:
-            augmented_masks = [] 
-            for mask in masks:
-                augmented_mask = self._resample(mask,composite,interpolator=sitk.sitkNearestNeighbor)
-                augmented_masks.append(augmented_mask)
+        if mask is not None:
+            augmented_mask = self._resample(mask,composite,interpolator=sitk.sitkNearestNeighbor)
 
-        augmented_imgs = [] 
-        for img in imgs:
-            augmented = self._resample(img,composite,interpolator=sitk.sitkLinear)
-            augmented_imgs.append(augmented)
-            
-        if masks is not None:
-            return (augmented_imgs,augmented_masks)
-        else:
-            return (augmented_imgs,None)
+        augmented = self._resample(img,composite,interpolator=sitk.sitkLinear)
+
+        return (augmented,augmented_mask)
 
 
     def add(self,transformname,probability,**kwargs):
@@ -221,13 +204,7 @@ class Augmentation3DUtil(object):
 
 
     def process(self,samples):
-    
-        imgs = self.imgs
-        masks = self.masks
-        
-        if samples is None:
-            return (imgs,masks),None
-
+        img = self.img
         augmentations = [] 
 
         sampling = np.zeros((len(self.transforms),samples)) 
@@ -236,7 +213,6 @@ class Augmentation3DUtil(object):
             per = self.transforms[i][1]
             ind = tuple(random.sample(range(samples),int(per*samples)))
             np.put(sampling[i],ind,1)
-
 
         for i in range(samples):
 
@@ -247,7 +223,8 @@ class Augmentation3DUtil(object):
                 subtransforms = [self.transforms[i] for i in range(len(self.transforms)) if i in ind]
                 augmentations.append(self._composite(subtransforms))
 
-        return (imgs,masks),augmentations
+
+        return img,augmentations
 
 
     def _flipimage(self,img):
